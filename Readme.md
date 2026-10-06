@@ -2,7 +2,7 @@ CoderHouse - Backend
 
 API REST desarrollada con Node.js y Express.js como parte del curso de Backend de CoderHouse.
 
-El proyecto implementa una API para la gestión de servicios y reservas, utilizando persistencia de datos mediante archivos JSON y operaciones CRUD.
+El proyecto implementa una API para la gestión de servicios y reservas, utilizando persistencia de datos mediante archivos JSON y una arquitectura organizada por capas.
 
 🚀 Tecnologías utilizadas
 
@@ -21,319 +21,275 @@ dotenv
 npm
 
 📁 Estructura del proyecto
-CoderHouse-BackEnd/
+BackEnd-Entrega5/
 │
 ├── src/
+│   │
+│   ├── app.js
+│   ├── server.js
+│   │
+│   ├── config/
+│   │   └── env.config.js
+│   │
 │   ├── data/
 │   │   ├── bookings.json
 │   │   └── services.json
 │   │
-│   ├── controllers/
-│   │   ├── bookin.controller.js
-│   │   └── services.controller.js
+│   ├── dao/
+│   │   ├── booking.dao.js
+│   │   └── service.dao.js
+│   │
+│   ├── repositories/
+│   │   ├── booking.repository.js
+│   │   └── service.repository.js
 │   │
 │   ├── managers/
-│   │   ├── BookingManager.js
-│   │   └── ServiceManager.js
+│   │   ├── booking.manager.js
+│   │   └── service.manager.js
+│   │
+│   ├── controllers/
+│   │   ├── booking.controller.js
+│   │   └── service.controller.js
 │   │
 │   ├── routes/
-│   │   ├── routerBooking.js
-│   │   ├── router.js
-│   │   └── routerService.js
+│   │   ├── booking.router.js
+│   │   └── service.router.js
 │   │
-│   ├── utils/
-│   │
-│   └── app.js
-│   └── server.js
+│   └── utils/
+│       └── path.js
 │
 ├── .env.example
 ├── .gitignore
 ├── package.json
 ├── package-lock.json
-└── Readme.md
+└── README.md
+
+🏗️ Arquitectura
+
+El proyecto utiliza una arquitectura organizada en diferentes capas:
+
+Cliente
+   │
+   ▼
+Router
+   │
+   ▼
+Controller
+   │
+   ▼
+Manager
+   │
+   ▼
+Repository
+   │
+   ▼
+DAO
+   │
+   ▼
+Archivo JSON
+
+Router
+
+Se encarga de definir las rutas y asociarlas con los Controllers correspondientes.
+
+Controller
+
+Recibe req y res, obtiene la información de la petición y devuelve la respuesta HTTP correspondiente.
+
+Manager
+
+Contiene la lógica de negocio y las validaciones necesarias para cada operación.
+
+Repository
+
+Se encarga de realizar las operaciones sobre los recursos utilizando el DAO.
+
+DAO
+
+Se encarga exclusivamente del acceso a los datos. En este proyecto utiliza fs/promises para leer y escribir los archivos JSON.
 
 ⚙️ Instalación
 1. Clonar el repositorio
-git clone https://github.com/MartinfMelendez/BackEnd-Entrega4
+git clone https://github.com/MartinfMelendez/BackEnd-Entrega5.git
 
 2. Ingresar al proyecto
-cd BackEnd-Entrega4
+cd BackEnd-Entrega5
 
 3. Instalar las dependencias
 npm install
 
 4. Configurar las variables de entorno
 
-Crear un archivo .env en la raíz del proyecto tomando como referencia el archivo .env.example.
+Crear un archivo .env en la raíz del proyecto tomando como referencia .env.example.
 
 Ejemplo:
 
 PORT=8080
 
 
-El archivo .env no debe subirse al repositorio. Para esto se encuentra incluido en .gitignore.
+El archivo .env no debe subirse al repositorio.
 
 5. Iniciar el servidor
 
-Para iniciar el servidor en modo desarrollo:
+Para iniciar el proyecto:
 
 npm run dev
 
-
-El proyecto utiliza Nodemon, por lo que el servidor se reinicia automáticamente cuando se detectan cambios en los archivos.
+El proyecto utiliza Nodemon para reiniciar automáticamente el servidor cuando se detectan cambios.
 
 Una vez iniciado, la API estará disponible en:
 
 http://localhost:8080
 
-
 El puerto utilizado depende del valor configurado en la variable PORT.
 
 📌 API REST
 
-La API cuenta actualmente con dos recursos principales:
+La API cuenta con dos recursos principales:
 
 /api/services — gestión de servicios.
 
 /api/bookings — gestión de reservas.
 
-Las rutas correspondientes a las reservas se configuran en el archivo routerBooking.js.
+🔧 Services
 
-🔧 Recurso Services
+El recurso services permite realizar operaciones CRUD sobre los servicios.
 
-La API permite realizar operaciones CRUD sobre los servicios.
-
-🔎 Endpoints disponibles
+Endpoints
 Método	Endpoint	Descripción
 GET	/api/services	Obtener todos los servicios
 GET	/api/services/:id	Obtener un servicio por ID
-POST	/api/services	Crear un nuevo servicio
+POST	/api/services	Crear un servicio
 PUT	/api/services/:id	Actualizar un servicio
 DELETE	/api/services/:id	Eliminar un servicio
-1. Obtener todos los servicios
-
-GET
-
-GET http://localhost:8080/api/services
-
+Obtener todos los servicios
+GET /api/services
 
 Devuelve la lista de servicios registrados.
 
-2. Obtener un servicio por ID
+Obtener un servicio
+GET /api/services/1
 
-GET
+El 1 corresponde al ID del servicio.
 
-GET http://localhost:8080/api/services/:id
+Crear un servicio
+POST /api/services
 
-
-Ejemplo:
-
-GET http://localhost:8080/api/services/1
-
-
-El valor 1 corresponde al ID del servicio que se desea consultar.
-
-3. Crear un nuevo servicio
-
-POST
-
-POST http://localhost:8080/api/services
-
-
-Enviar los datos mediante el Body en formato JSON.
-
-Ejemplo:
+Body:
 
 {
-  "name": "Servicio de prueba",
-  "description": "Descripción del servicio",
-  "duration": 60,
-  "price": 15000,
-  "category": "General",
-  "available": true
+    "name": "Servicio de prueba",
+    "description": "Descripción del servicio",
+    "duration": 60,
+    "price": 15000,
+    "category": "General",
+    "available": true
 }
 
-Campos
+Campos:
+
 Campo	Tipo	Descripción
 name	String	Nombre del servicio
-description	String	Descripción del servicio
+description	String	Descripción
 duration	Number	Duración del servicio
-price	Number	Precio del servicio
-category	String	Categoría del servicio
-available	Boolean	Indica si el servicio está disponible
-4. Actualizar un servicio
-
-PUT
-
-PUT http://localhost:8080/api/services/:id
-
-
-Ejemplo:
-
-PUT http://localhost:8080/api/services/1
+price	Number	Precio
+category	String	Categoría
+available	Boolean	Disponibilidad
+Actualizar un servicio
+PUT /api/services/1
 
 
 Body:
 
 {
-  "name": "Servicio actualizado",
-  "description": "Nueva descripción",
-  "duration": 90,
-  "price": 20000,
-  "category": "General",
-  "available": true
+    "name": "Servicio actualizado",
+    "description": "Nueva descripción",
+    "duration": 90,
+    "price": 20000,
+    "category": "General",
+    "available": true
 }
 
+Eliminar un servicio
+DELETE /api/services/1
 
-El :id corresponde al servicio que se desea modificar.
-
-5. Eliminar un servicio
-
-DELETE
-
-DELETE http://localhost:8080/api/services/:id
-
-
-Ejemplo:
-
-DELETE http://localhost:8080/api/services/1
-
-
-El :id corresponde al servicio que se desea eliminar.
-
-📅 Recurso Bookings
+📅 Bookings
 
 El recurso bookings permite administrar las reservas de los clientes y asociar servicios a cada reserva.
 
-Cada reserva posee la siguiente estructura:
-
-{
-  "id": 1,
-  "clientName": "Martin Biagi",
-  "clientEmail": "Martin@email.com",
-  "date": "2026-10-10",
-  "time": "15:30",
-  "status": "confirmada",
-  "services": []
-}
-
-
-El campo id se genera automáticamente.
-
-Los servicios asociados a una reserva se almacenan dentro del array services utilizando la siguiente estructura:
-
-{
-  "service": 1,
-  "quantity": 1
-}
-
-
-Si el mismo servicio se agrega nuevamente a la reserva, no se crea un nuevo elemento. Se incrementa la propiedad quantity.
-
-Por ejemplo:
-
-"services": [
-  {
-    "service": 1,
-    "quantity": 2
-  }
-]
-
-
-Las rutas correspondientes a este recurso se configuran en el archivo:
-
-routerBooking.js
-
-🔎 Endpoints disponibles
+Endpoints
 Método	Endpoint	Descripción
-POST	/api/bookings	Crear una nueva reserva
-GET	/api/bookings/:bid	Obtener una reserva por ID
-POST	/api/bookings/:bid/services/:sid	Agregar un servicio a una reserva
-1. Crear una reserva
+GET	/api/bookings	Obtener todas las reservas
+GET	/api/bookings/:id	Obtener una reserva por ID
+POST	/api/bookings	Crear una reserva
+POST	/api/bookings/:bookingId/services/:serviceId	Agregar un servicio a una reserva
+DELETE	/api/bookings/:id	Eliminar una reserva
+Crear una reserva
+POST /api/bookings
 
-POST
 
-POST http://localhost:8080/api/bookings
-
-
-La reserva puede crearse inicialmente con el array services vacío.
-
-Ejemplo:
+Body:
 
 {
-  "clientName": "Martin Biagi",
-  "clientEmail": "Martin@email.com",
-  "date": "2026-10-10",
-  "time": "15:30",
-  "status": "confirmada",
-  "services": []
+    "clientName": "Martin Biagi",
+    "clientEmail": "Martin@email.com",
+    "date": "2026-10-10",
+    "time": "15:30",
+    "status": "confirmada",
+    "services": []
 }
 
 
-El id de la reserva se genera automáticamente.
+El ID de la reserva se genera automáticamente.
 
-2. Obtener una reserva por ID
+Obtener todas las reservas
+GET /api/bookings
 
-GET
+Obtener una reserva
+GET /api/bookings/1
 
-GET http://localhost:8080/api/bookings/:bid
-
-
-Ejemplo:
-
-GET http://localhost:8080/api/bookings/1
-
-
-El :bid corresponde al ID de la reserva que se desea consultar.
-
-3. Agregar un servicio a una reserva
-
-POST
-
-POST http://localhost:8080/api/bookings/:bid/services/:sid
-
-
-Ejemplo:
-
-POST http://localhost:8080/api/bookings/1/services/2
+Agregar un servicio a una reserva
+POST /api/bookings/1/services/2
 
 
 Donde:
 
-:bid corresponde al ID de la reserva.
+1 corresponde al ID de la reserva.
 
-:sid corresponde al ID del servicio.
+2 corresponde al ID del servicio.
 
-Antes de agregar el servicio, la API valida que:
+Antes de asociar el servicio, la aplicación verifica que tanto la reserva como el servicio existan.
 
-La reserva exista.
-
-El servicio exista.
-
-Si el servicio todavía no está asociado a la reserva, se agrega con:
+Si el servicio todavía no está asociado:
 
 {
-  "service": 2,
-  "quantity": 1
+    "service": 2,
+    "quantity": 1
 }
 
 
-Si el servicio ya existe dentro de la reserva, se incrementa su cantidad:
+Si el mismo servicio se agrega nuevamente, se incrementa quantity:
 
 {
-  "service": 2,
-  "quantity": 2
+    "service": 2,
+    "quantity": 2
 }
+
+Eliminar una reserva
+DELETE /api/bookings/1
+
+
+El 1 corresponde al ID de la reserva que se desea eliminar.
 
 🧪 Pruebas de la API
 
 Los endpoints pueden probarse utilizando herramientas como:
 
+Thunder Client
+
 Postman
 
 Insomnia
-
-Thunder Client
 
 REST Client para VS Code
 
@@ -344,24 +300,30 @@ POST
 PUT
 DELETE
 
-
-Para el recurso bookings:
-
-POST /api/bookings
-GET /api/bookings/:bid
-POST /api/bookings/:bid/services/:sid
-
 📦 Dependencias
 
-El proyecto utiliza actualmente:
+El proyecto utiliza:
 
-Express 5.2.1 — Framework para la creación del servidor y la API REST.
+Express — Framework para la creación del servidor y la API REST.
 
-dotenv 17.4.2 — Gestión de variables de entorno.
+dotenv — Gestión de variables de entorno.
+
+Nodemon — Reinicio automático del servidor durante el desarrollo.
 
 El proyecto utiliza ES Modules, por lo que se trabaja con import y export.
 
-La persistencia de los datos se realiza mediante archivos JSON utilizando el módulo fs/promises de Node.js.
+La persistencia de los datos se realiza mediante archivos JSON utilizando fs/promises.
+
+🔐 Variables de entorno
+
+El proyecto utiliza variables de entorno mediante dotenv.
+
+El archivo .env debe contener, como mínimo:
+
+PORT=8080
+
+
+El archivo .env se encuentra excluido del repositorio mediante .gitignore.
 
 🎯 Objetivo del proyecto
 
@@ -369,11 +331,19 @@ Este proyecto forma parte del aprendizaje de Backend con Node.js y tiene como ob
 
 Creación de servidores con Node.js.
 
-Uso del framework Express.
+Uso de Express.
 
 Manejo de rutas.
 
-Organización de rutas mediante routers.
+Routers.
+
+Controllers.
+
+Managers.
+
+Repositories.
+
+DAO.
 
 Métodos HTTP.
 
@@ -385,17 +355,19 @@ Recepción de información mediante JSON.
 
 Operaciones CRUD.
 
+Gestión de servicios.
+
 Gestión de reservas.
 
 Asociación de servicios a reservas.
 
 Manejo de cantidades de servicios.
 
-Persistencia de datos mediante File System.
+Persistencia mediante File System.
 
-Uso de variables de entorno.
+Variables de entorno.
 
-Organización básica de un proyecto backend.
+Organización de un proyecto backend por capas.
 
 👨‍💻 Autor
 
@@ -403,4 +375,5 @@ Martin F. Melendez
 
 Repositorio:
 
-https://github.com/MartinfMelendez/CoderHouse-BackEnd
+https://github.com/MartinfMelendez/BackEnd-Entrega5
+

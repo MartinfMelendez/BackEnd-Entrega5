@@ -1,39 +1,24 @@
-import fs from 'fs/promises'
-import raiz from '../utils/path.js'
-import { getAllServices } from './ServiceManager.js'
+import {
+    getAll,
+    getById,
+    create,
+    update,
+    remove,
+    addService
+} from '../repository/bookin.repository.js'
 
-const PATH = raiz + '/data/bookings.json'
+import { getAllServices } from './ServiceManager.js'
 
 
 async function getAllBookings() {
 
-    try {
-
-        const fileContent = await fs.readFile(PATH, 'utf-8')
-
-        return JSON.parse(fileContent)
-
-    } catch (error) {
-
-        if (error.code === 'ENOENT') {
-
-            await fs.writeFile(PATH, '[]')
-
-            return []
-        }
-
-        throw error
-    }
+    return await getAll()
 }
 
 
 async function getBookingById(id) {
 
-    const bookings = await getAllBookings()
-
-    const booking = bookings.find(
-        booking => booking.id === Number(id)
-    )
+    const booking = await getById(id)
 
     if (!booking) {
         throw new Error('Reserva no encontrada')
@@ -52,11 +37,17 @@ async function addBooking(
     services = []
 ) {
 
-    if (!clientName || !clientEmail || !date || !time || !status) {
+    if (
+        !clientName ||
+        !clientEmail ||
+        !date ||
+        !time ||
+        !status
+    ) {
         throw new Error('Todos los campos son obligatorios')
     }
 
-    const bookings = await getAllBookings()
+    const bookings = await getAll()
 
     const existingBooking = bookings.find(
         booking =>
@@ -69,32 +60,21 @@ async function addBooking(
         throw new Error('La reserva que intenta ingresar ya existe')
     }
 
-    const newId = bookings.length > 0
-        ? Math.max(...bookings.map(booking => booking.id)) + 1
-        : 1
-
-    const newBooking = {
-        id: newId,
+    return await create({
         clientName,
         clientEmail,
         date,
         time,
         status,
         services
-    }
-
-    bookings.push(newBooking)
-
-    await fs.writeFile(
-        PATH,
-        JSON.stringify(bookings, null, 2)
-    )
-
-    return newBooking
+    })
 }
 
 
-async function addServiceToReservation(bookingId, serviceId) {
+async function addServiceToReservation(
+    bookingId,
+    serviceId
+) {
 
     const services = await getAllServices()
 
@@ -106,59 +86,40 @@ async function addServiceToReservation(bookingId, serviceId) {
         throw new Error('El servicio ingresado no existe')
     }
 
-    const bookings = await getAllBookings()
-
-    const booking = bookings.find(
-        booking => booking.id === Number(bookingId)
-    )
+    const booking = await getById(bookingId)
 
     if (!booking) {
         throw new Error('La reserva no existe')
     }
 
-    const bookingService = booking.services.find(
-        service => service.service === Number(serviceId)
+    return await addService(
+        bookingId,
+        serviceId
     )
+}
 
-    if (!bookingService) {
 
-        booking.services.push({
-            service: service.id,
-            quantity: 1
-        })
+async function updateBooking(id, data) {
 
-    } else {
+    const booking = await getById(id)
 
-        bookingService.quantity += 1
+    if (!booking) {
+        throw new Error('Reserva no encontrada')
     }
 
-    await fs.writeFile(
-        PATH,
-        JSON.stringify(bookings, null, 2)
-    )
+    const { id: ignoredId, ...rest } = data
 
-    return booking
+    return await update(id, rest)
 }
 
 
 async function deleteBooking(id) {
 
-    const bookings = await getAllBookings()
+    const booking = await remove(id)
 
-    const bookingIndex = bookings.findIndex(
-        booking => booking.id === Number(id)
-    )
-
-    if (bookingIndex === -1) {
+    if (!booking) {
         throw new Error('Reserva no encontrada')
     }
-
-    bookings.splice(bookingIndex, 1)
-
-    await fs.writeFile(
-        PATH,
-        JSON.stringify(bookings, null, 2)
-    )
 
     return {
         message: 'Reserva eliminada correctamente'
@@ -171,5 +132,6 @@ export {
     getBookingById,
     addBooking,
     addServiceToReservation,
+    updateBooking,
     deleteBooking
 }

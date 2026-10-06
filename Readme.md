@@ -21,6 +21,7 @@ dotenv
 npm
 
 📁 Estructura del proyecto
+```text
 BackEnd-Entrega5/
 │
 ├── src/
@@ -63,6 +64,7 @@ BackEnd-Entrega5/
 ├── package.json
 ├── package-lock.json
 └── README.md
+```
 
 🏗️ Arquitectura
 

@@ -69,7 +69,7 @@ BackEnd-Entrega5/
 🏗️ Arquitectura
 
 El proyecto utiliza una arquitectura organizada en diferentes capas:
-
+```text
 Cliente
    │
    ▼
@@ -89,6 +89,7 @@ DAO
    │
    ▼
 Archivo JSON
+```
 
 Router
 

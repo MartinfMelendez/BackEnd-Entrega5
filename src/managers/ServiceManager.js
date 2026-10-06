@@ -1,38 +1,21 @@
-import fs from 'fs/promises'
-import raiz from '../utils/path.js'
-
-const PATH = raiz + '/data/services.json'
+import {
+    getAll,
+    getById,
+    create,
+    update,
+    remove
+} from '../repository/service.repository.js'
 
 
 async function getAllServices() {
 
-    try {
-
-        const fileContent = await fs.readFile(PATH, 'utf-8')
-
-        return JSON.parse(fileContent)
-
-    } catch (error) {
-
-        if (error.code === 'ENOENT') {
-
-            await fs.writeFile(PATH, '[]')
-
-            return []
-        }
-
-        throw error
-    }
+    return await getAll()
 }
 
 
 async function getServiceById(id) {
 
-    const services = await getAllServices()
-
-    const service = services.find(
-        service => service.id === Number(id)
-    )
+    const service = await getById(id)
 
     if (!service) {
         throw new Error('Servicio no encontrado')
@@ -66,87 +49,40 @@ async function addService(
         throw new Error('El precio debe ser un número positivo')
     }
 
-    const services = await getAllServices()
-
-    const newId = services.length > 0
-        ? Math.max(...services.map(service => service.id)) + 1
-        : 1
-
-    const newService = {
-        id: newId,
+    return await create({
         name,
         description,
         duration,
         price,
         category,
         available
-    }
-
-    services.push(newService)
-
-    await fs.writeFile(
-        PATH,
-        JSON.stringify(services, null, 2),
-        'utf-8'
-    )
-
-    return newService
+    })
 }
 
 
 async function updateService(id, data) {
 
-    const services = await getAllServices()
+    const service = await getById(id)
 
-    const index = services.findIndex(
-        service => service.id === Number(id)
-    )
-
-    if (index === -1) {
+    if (!service) {
         throw new Error('Servicio no encontrado')
     }
 
     const { id: ignoredId, ...rest } = data
 
-    const updatedService = {
-        ...services[index],
-        ...rest,
-        id: services[index].id
-    }
-
-    services[index] = updatedService
-
-    await fs.writeFile(
-        PATH,
-        JSON.stringify(services, null, 2),
-        'utf-8'
-    )
-
-    return updatedService
+    return await update(id, rest)
 }
 
 
 async function deleteService(id) {
 
-    const services = await getAllServices()
+    const service = await remove(id)
 
-    const index = services.findIndex(
-        service => service.id === Number(id)
-    )
-
-    if (index === -1) {
+    if (!service) {
         throw new Error('Servicio no encontrado')
     }
 
-    const serviceDeleted = services.splice(index, 1)
-
-    await fs.writeFile(
-        PATH,
-        JSON.stringify(services, null, 2),
-        'utf-8'
-    )
-
-    return serviceDeleted[0]
+    return service
 }
 
 
@@ -157,5 +93,6 @@ export {
     updateService,
     deleteService
 }
+
 
 
